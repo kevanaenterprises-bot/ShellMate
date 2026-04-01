@@ -62,6 +62,5 @@ const session = { user }
     console.error('Anthropic error:', err)
     return res.status(500).json({ error: 'AI request failed' })
   }
-}git add .
-git commit -m "fix auth session handling"
-git push
+}
+
