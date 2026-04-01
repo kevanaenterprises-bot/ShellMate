@@ -18,9 +18,12 @@ const PERSONALITIES = {
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
 
-  const supabase = createServerSupabaseClient({ req, res })
-  const { data: { session } } = await supabase.auth.getSession()
-  if (!session) return res.status(401).json({ error: 'Not logged in' })
+  const token = req.cookies['sb-access-token'] || 
+  req.headers.authorization?.replace('Bearer ', '')
+if (!token) return res.status(401).json({ error: 'Not logged in' })
+const { data: { user } } = await supabaseAdmin.auth.getUser(token)
+if (!user) return res.status(401).json({ error: 'Invalid session' })
+const session = { user }
 
   const { message, messages, personality = 'nova' } = req.body
   if (!message) return res.status(400).json({ error: 'No message provided' })
@@ -59,4 +62,6 @@ export default async function handler(req, res) {
     console.error('Anthropic error:', err)
     return res.status(500).json({ error: 'AI request failed' })
   }
-}
+}git add .
+git commit -m "fix auth session handling"
+git push
