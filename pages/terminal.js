@@ -44,7 +44,10 @@ export default function Terminal() {
 
     const res = await fetch('/api/terminal', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+  'Content-Type': 'application/json',
+  'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+},
       body: JSON.stringify({
         message: userMsg,
         messages: messages.slice(-10),
