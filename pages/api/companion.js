@@ -2,7 +2,10 @@ import Anthropic from '@anthropic-ai/sdk'
 import { supabaseAdmin } from '../../lib/supabase'
 import { checkAndIncrementUsage } from '../../lib/usage'
 
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY,
+  baseURL: process.env.ANTHROPIC_BASE_URL
+})
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
@@ -17,20 +20,14 @@ export default async function handler(req, res) {
   const { message, messages, os } = req.body
   if (!message) return res.status(400).json({ error: 'No message provided' })
 
-  const usage = await checkAndIncrementUsage(user.id, 'terminal')
+  const usage = await checkAndIncrementUsage(user.id, 'companion')
   if (!usage.allowed) return res.status(429).json({ error: usage.reason, upgrade: true })
 
-  const systemPrompt = `You are a friendly terminal command expert. The user is on: ${os || 'Linux'}.
-When they describe what they want to do, respond with:
-1. The exact command(s) they need in a code block
-2. A plain-English explanation of what each part does
-3. Any important warnings
-4. A quick tip if relevant
-Keep explanations concise. Always tailor commands to ${os || 'Linux'}.`
+  const systemPrompt = `You are a warm, encouraging companion and motivational coach. Your job is to listen, support, and uplift the user. Be empathetic, positive, and genuinely caring. Offer encouragement, celebrate their wins (big or small), and help them stay motivated. Keep responses conversational and heartfelt.`
 
   try {
     const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model: 'deepseek-v4-flash',
       max_tokens: 1000,
       system: systemPrompt,
       messages: [...(messages || []), { role: 'user', content: message }]
