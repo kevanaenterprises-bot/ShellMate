@@ -2,7 +2,10 @@ import Anthropic from '@anthropic-ai/sdk'
 import { supabaseAdmin } from '../../lib/supabase'
 import { checkAndIncrementUsage } from '../../lib/usage'
 
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY,
+  baseURL: process.env.ANTHROPIC_BASE_URL
+})
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
@@ -30,7 +33,7 @@ Keep explanations concise. Always tailor commands to ${os || 'Linux'}.`
 
   try {
     const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model: 'deepseek-v4-flash',
       max_tokens: 1000,
       system: systemPrompt,
       messages: [...(messages || []), { role: 'user', content: message }]
